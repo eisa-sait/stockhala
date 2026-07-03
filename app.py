@@ -2,8 +2,10 @@ import streamlit as st
 import pandas as pd
 from screener import analyze_stock
 from shariah import is_shariah_compliant
+from ai_advisor import explain_stock
+from gpt_predictor import predict_best_stock
 
-st.title("StockHalal V10")
+st.title("StockHalal V11")
 
 # Inputs
 country = st.selectbox("Select Market", ["India", "US"])
@@ -43,11 +45,9 @@ if st.button("Scan Stocks"):
         if result:
             shariah = is_shariah_compliant(result["info"])
 
-            # Skip non-Shariah stocks
             if not shariah:
                 continue
 
-            # Filters (now includes affordability)
             if (
                 result["risk"] <= risk_limit
                 and result["confidence"] >= confidence_limit
@@ -100,6 +100,20 @@ if st.button("Scan Stocks"):
         # Chart
         st.subheader(f"Price Chart: {best_stock['Ticker']}")
         st.line_chart(best_stock["History"]["Close"])
+
+        # AI Stock Explanation
+        st.subheader("AI Analysis")
+
+        if st.button("Explain Best Stock"):
+            ai_response = explain_stock(best_stock)
+            st.write(ai_response)
+
+        # GPT Conviction Pick
+        st.subheader("GPT Conviction Pick")
+
+        if st.button("Get GPT Prediction"):
+            gpt_pick = predict_best_stock(results[:5])
+            st.write(gpt_pick)
 
         # Portfolio Allocation
         st.subheader("Portfolio Allocation")
