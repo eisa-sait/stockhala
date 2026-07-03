@@ -1,8 +1,8 @@
 import os
-from openai import OpenAI
+from groq import Groq
 
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
+client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
 )
 
 
@@ -30,7 +30,7 @@ def explain_stock(stock_data):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="llama3-70b-8192",
             messages=[
                 {"role": "user", "content": prompt}
             ]
@@ -39,4 +39,4 @@ def explain_stock(stock_data):
         return response.choices[0].message.content
 
     except Exception as e:
-        return f"GPT Error: {str(e)}"
+        return f"Groq Error: {str(e)}"
