@@ -3,4 +3,4 @@ pandas
 yfinance
 ta
 textblob
-openai
+groq
