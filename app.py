@@ -3,7 +3,7 @@ import pandas as pd
 from screener import analyze_stock
 from shariah import is_shariah_compliant
 
-st.title("StockHalal V9")
+st.title("StockHalal V10")
 
 # Inputs
 country = st.selectbox("Select Market", ["India", "US"])
@@ -47,10 +47,11 @@ if st.button("Scan Stocks"):
             if not shariah:
                 continue
 
-            # Filters
+            # Filters (now includes affordability)
             if (
                 result["risk"] <= risk_limit
                 and result["confidence"] >= confidence_limit
+                and result["current_price"] <= investment_amount
             ):
 
                 score = (
@@ -113,9 +114,12 @@ if st.button("Scan Stocks"):
                 stock["Score"] / total_score
             ) * investment_amount
 
+            quantity = int(allocation // stock["Current Price"])
+
             allocation_data.append({
                 "Ticker": stock["Ticker"],
-                "Allocate": round(allocation, 2)
+                "Allocate": round(allocation, 2),
+                "Shares": quantity
             })
 
         st.table(allocation_data)
@@ -125,7 +129,7 @@ if st.button("Scan Stocks"):
         st.table(results)
 
     else:
-        st.write("No matching Shariah-compliant stocks found.")
+        st.write("No matching affordable Shariah-compliant stocks found.")
 
 # Watchlist Alerts
 if watchlist_stock:
