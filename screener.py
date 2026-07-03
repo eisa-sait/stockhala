@@ -35,31 +35,40 @@ def get_signal(data):
 
 
 def get_news_sentiment(stock):
-    news = stock.news
+    try:
+        news = stock.news
 
-    if not news:
-        return "Neutral", 50
+        if not news:
+            return "Neutral", 50
 
-    scores = []
+        scores = []
 
-    for item in news[:5]:
-        title = item.get("title", "")
-        polarity = TextBlob(title).sentiment.polarity
-        scores.append(polarity)
+        for item in news[:5]:
+            title = item.get("title", "")
+            polarity = TextBlob(title).sentiment.polarity
+            scores.append(polarity)
 
-    avg_score = sum(scores) / len(scores)
+        avg_score = sum(scores) / len(scores)
 
-    if avg_score > 0.2:
-        return "Bullish", 80
-    elif avg_score < -0.2:
-        return "Bearish", 20
-    else:
+        if avg_score > 0.2:
+            return "Bullish", 80
+        elif avg_score < -0.2:
+            return "Bearish", 20
+        else:
+            return "Neutral", 50
+
+    except:
         return "Neutral", 50
 
 
 def analyze_stock(ticker):
     stock = yf.Ticker(ticker)
-    hist = stock.history(period="6mo")
+
+    # Safe history fetch
+    try:
+        hist = stock.history(period="6mo")
+    except:
+        return None
 
     if hist.empty:
         return None
@@ -67,15 +76,22 @@ def analyze_stock(ticker):
     risk = calculate_risk(hist)
     confidence = calculate_confidence(hist)
     signal = get_signal(hist)
+
+    # Safe sentiment
     sentiment, sentiment_score = get_news_sentiment(stock)
 
-    info = stock.info
+    # Safe info fetch
+    try:
+        info = stock.info
+    except:
+        info = {}
 
     pe_ratio = info.get("trailingPE", 0)
     roe = info.get("returnOnEquity", 0)
     debt_ratio = info.get("debtToEquity", 0)
     dividend_yield = info.get("dividendYield", 0)
 
+    # Fundamental scoring
     fundamental_score = 0
 
     if pe_ratio and pe_ratio < 25:
@@ -91,6 +107,7 @@ def analyze_stock(ticker):
         fundamental_score += 20
 
     current_price = hist["Close"].iloc[-1]
+
     stop_loss = round(current_price * 0.95, 2)
     target_price = round(current_price * 1.10, 2)
 
