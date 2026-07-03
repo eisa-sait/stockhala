@@ -1,6 +1,9 @@
+import os
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-...yK0A")
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 
 
 def predict_best_stock(results):
@@ -27,11 +30,15 @@ def predict_best_stock(results):
     4. Estimated upside %
     """
 
-    response = client.chat.completions.create(
-        model="gpt-4.1",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
 
-    return response.choices[0].message.content
+        return response.choices[0].message.content
+
+    except Exception as e:
+        return f"GPT Error: {str(e)}"
