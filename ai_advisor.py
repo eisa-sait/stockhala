@@ -19,6 +19,7 @@ def explain_stock(stock_data):
     ROE: {stock_data['ROE']}
     Debt Ratio: {stock_data['Debt Ratio']}
     Dividend Yield: {stock_data['Dividend Yield']}
+    Current Price: {stock_data['Current Price']}
     Target Price: {stock_data['Target Price']}
 
     Explain:
@@ -30,7 +31,7 @@ def explain_stock(stock_data):
 
     try:
         response = client.chat.completions.create(
-            model="llama3-70b-8192",
+            model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "user", "content": prompt}
             ]
